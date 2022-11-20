@@ -1,0 +1,228 @@
+create database QrAssist;
+use QrAssist;
+
+go
+
+create table TipoRoles
+(
+idTipoRol numeric (11) primary key,
+nombreRol varchar (20) not null
+);
+
+insert into TipoRoles values ('1','administrador')
+insert into TipoRoles values ('2','aprendiz')
+insert into TipoRoles values ('3','instructor')
+
+go
+
+create table tipoDocumento
+(
+idTipoDocumento numeric (11) primary key,
+descripcion varchar (30) not null
+);
+
+insert into tipoDocumento values ('1','cedula de ciudadania')
+insert into tipoDocumento values ('2','tarjeta de identidad')
+insert into tipoDocumento values ('3','tarjeta de extrajeria')
+go
+
+create table usuarios
+(
+idUsuario numeric (11) primary key,
+nombreUsuario varchar (30) not null,
+apellidoUsuario varchar (30) not null,
+numeroDocumento numeric (11) not null,
+Contraseña varchar (150) not null,
+emailInstitucional varchar (100) not null,
+direccionRecidencial varchar (60) not null,
+telefonoMovil numeric (11) not null,
+idTipoDocumento numeric (11) not null,
+idTipoRol numeric (11) not null,
+foreign key (idTipoDocumento) references tipoDocumento(idTipoDocumento),
+foreign key (idTipoRol) references  TipoRoles (idTipoRol)
+);
+
+insert into usuarios values ('45','esteban','robrigez','5455321','654321','estreban@gmail.com','cr3 5a','4567633','2','2')
+insert into usuarios values ('46','este','robri','5455','6543','est@gmail.com','cr8 5a','45676423','1','1')
+
+
+go
+
+create table programas
+(
+idPrograma numeric (11) primary key,
+nombrePrograma varchar (100) not null
+);
+
+go
+
+create table fichas
+(
+idFicha numeric (11) primary key,
+idPrograma numeric (11) not null,
+foreign key (idPrograma) references programas(idPrograma)
+);
+
+go
+
+create table asignaturas
+(
+idAsignatura numeric (11)primary key,
+nombreAsignatura varchar (100) not null
+);
+
+go
+
+create table asociacionUsuariosFichas
+(
+
+idAsociacionUsuarioFicha numeric (11) primary key,
+idFicha numeric (11) not null,
+idUsuario numeric (11) not null,
+foreign key (idFicha) references fichas(idFicha),
+foreign key (idUsuario) references usuarios(idUsuario)
+);
+
+go
+
+create table asociacionAsignaturasFichas
+(
+
+idAsociacionAsignaturaFicha numeric (11) primary key,
+idFicha numeric (11) not null,
+idAsignatura numeric (11) not null,
+idInstructor numeric (11) not null,
+foreign key (idFicha) references fichas(idFicha),
+foreign key (idAsignatura) references asignaturas(idAsignatura),
+foreign key (idInstructor) references usuarios(idUsuario)
+);
+
+go
+
+create table estadosSolicitudes
+(
+idEstado numeric (11) primary key,
+nombreEstado varchar (50) not null
+);
+
+go
+
+create table solicitudCambioAsistencia
+
+(
+idSolicitudCambioAsistencia numeric (11) primary key,
+asunto varchar (50) not null,
+contenido varchar (250) not null,
+idAprendiz numeric (11) not null,
+idInstructor numeric (11) not null,
+idEstadoSolicitud numeric (11) not null,
+idFicha numeric (11) not null,
+foreign key (idAprendiz) references usuarios(idUsuario),
+foreign key (idInstructor) references usuarios(idUsuario),
+foreign key (idEstadoSolicitud) references estadosSolicitudes(idEstado),
+foreign key (idFicha) references fichas(idFicha)
+);
+
+go
+
+create table clase
+(
+idClase numeric (11) primary key,
+nombreClase Varchar (30) not null,
+dia	        Date not null,	
+hora_inicio	Time not null,	
+hora_final	Time not null,	
+idAsociacionAsignaturaFicha numeric (11) not null,
+foreign key (idAsociacionAsignaturaFicha) references asociacionAsignaturasFichas(idAsociacionAsignaturaFicha)
+);
+
+go
+
+create table tipoAsistencia
+
+(
+idTipoAsistencia numeric (11) primary key,
+nombreTipoAsistencia  varchar(25) not null
+);
+
+go
+
+create table Asistencias
+(
+idAsistencia numeric (11) primary key,
+horaFirmada datetime not null,
+idClase	Numeric	(11) not null,
+idTipoAsistencia Numeric (11) not null,
+idSolicitudCambioAsistencia Numeric (11) not null,
+idAprendiz  Numeric (11) not null,
+foreign key (idClase) references clase (idClase),
+foreign key (idTipoAsistencia) references tipoAsistencia(idTipoAsistencia),
+foreign key (idSolicitudCambioAsistencia) references solicitudCambioAsistencia(idSolicitudCambioAsistencia),
+foreign key (idAprendiz) references usuarios(idUsuario)
+);
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+go
+
+create view ObtenerTodosUsuarios
+as
+select * from usuarios
+
+go
+
+
+create view buscar_nombre_usuarios
+as
+select * from usuarios where nombreUsuario like'%" + nombreUsuario + "%'
+
+go
+
+create view buscar_id_usuarios
+as
+select * from usuarios where idUsuario like'%" + idUsuario + "%'
+
+go
+
+create view doble_usuarios
+as
+select * from usuarios where idUsuario  like'%" + idUsuario + "%' and nombreUsuario like'%" + nombreUsuario + "%'
+
+go
+
+create view Buscarusuarios
+as
+select * from usuarios where idUsuario = '" + idUsuario + "'
+
+go
+
+create procedure AgregarUsuario
+as
+insert into usuarios values ( '" + idUsuario + "' ,'" + nombreUsuario + "','" + apellidoUsuario + "','" + numeroDocumento + "','" + Contraseña + "','" + 
+emailInstitucional + "','" + direccionRecidencial + "','" + telefonoMovil + "','" + idTipoDocumento + "','" + idTipoRol + "')
+
+go
+
+create procedure ActualizarUsuario
+as
+update usuarios set nombreUsuario ='" + nombreUsuario + "', apellidoUsuario ='" + apellidoUsuario + "', numeroDocumento ='" + numeroDocumento + "',Contraseña ='" + Contraseña + "',
+emailInstitucional ='" + emailInstitucional + "', direccionRecidencial ='" + direccionRecidencial + "', telefonoMovil ='" + telefonoMovil + "', idTipoDocumento ='" + idTipoDocumento + "', idTipoRol ='" + idTipoRol + "' where idUsuario = '" + idUsuario + "'
+
+go
+
+create procedure EliminarUsuario
+as
+delete from usuarios where idUsuario = '" + idUsuario + "'
+
+/*go
+
+create procedure SPIniciarSesion
+@idUsuario numeric (11),
+@contraseña varchar (150)
+as
+select * from usuarios
+where idUsuario=@idUsuario and contraseña=@contraseña;
+
+exec SPIniciarSesion '789456','321'*/
+
+
